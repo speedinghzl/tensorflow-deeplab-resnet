@@ -35,9 +35,11 @@ def image_mirroring(img, label):
     """
     
     distort_left_right_random = tf.random_uniform([1], 0, 1.0, dtype=tf.float32)[0]
-    mirror = tf.less(tf.pack([1.0, distort_left_right_random, 1.0]), 0.5)
-    img = tf.reverse(img, mirror)
-    label = tf.reverse(label, mirror)
+    # mirror = tf.less(tf.stack([1.0, distort_left_right_random, 1.0]), 0.5)
+    # img = tf.reverse(img, mirror)
+    # label = tf.reverse(label, mirror)
+    img = tf.cond(distort_left_right_random > 0.5, lambda: img, lambda: tf.reverse(img, [1,]))
+    label = tf.cond(distort_left_right_random > 0.5, lambda: label, lambda: tf.reverse(label, [1,]))
     return img, label
 
 def random_crop_and_pad_image_and_labels(image, label, crop_h, crop_w, ignore_label=255):

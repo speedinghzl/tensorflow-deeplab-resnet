@@ -18,12 +18,13 @@ import numpy as np
 
 from deeplab_resnet import DeepLabResNetModel, ImageReader, decode_labels, inv_preprocess, prepare_label
 
+os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 n_classes = 21
 
-BATCH_SIZE = 10
+BATCH_SIZE = 5
 DATA_DIRECTORY = '/workspace/hzl/tensorflow-program/data/VOCdevkit/voc12'
 DATA_LIST_PATH = './dataset/train.txt'
-INPUT_SIZE = '241,241'
+INPUT_SIZE = '321,321'
 LEARNING_RATE = 2.5e-4
 MOMENTUM = 0.9
 NUM_STEPS = 20001
