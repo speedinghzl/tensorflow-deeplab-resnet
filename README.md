@@ -1,4 +1,4 @@
-# DeepLab-ResNet-TensorFlow
+# DeepLab-ResNet-TensorFlow(r1.0)
 
 [![Build Status](https://travis-ci.org/DrSleep/tensorflow-deeplab-resnet.svg?branch=master)](https://travis-ci.org/DrSleep/tensorflow-deeplab-resnet)
 
