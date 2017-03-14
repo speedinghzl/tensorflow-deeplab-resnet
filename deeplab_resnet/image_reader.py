@@ -16,9 +16,9 @@ def image_scaling(img, label):
     """
     
     scale = tf.random_uniform([1], minval=0.5, maxval=1.5, dtype=tf.float32, seed=None)
-    h_new = tf.to_int32(tf.mul(tf.to_float(tf.shape(img)[0]), scale))
-    w_new = tf.to_int32(tf.mul(tf.to_float(tf.shape(img)[1]), scale))
-    new_shape = tf.squeeze(tf.pack([h_new, w_new]), squeeze_dims=[1])
+    h_new = tf.to_int32(tf.multiply(tf.to_float(tf.shape(img)[0]), scale))
+    w_new = tf.to_int32(tf.multiply(tf.to_float(tf.shape(img)[1]), scale))
+    new_shape = tf.squeeze(tf.stack([h_new, w_new]), squeeze_dims=[1])
     img = tf.image.resize_images(img, new_shape)
     label = tf.image.resize_nearest_neighbor(tf.expand_dims(label, 0), new_shape)
     label = tf.squeeze(label, squeeze_dims=[0])
@@ -54,7 +54,7 @@ def random_crop_and_pad_image_and_labels(image, label, crop_h, crop_w, ignore_la
 
     label = tf.cast(label, dtype=tf.float32)
     label = label - ignore_label # Needs to be subtracted and later added due to 0 padding.
-    combined = tf.concat(2, [image, label]) 
+    combined = tf.concat([image, label], 2) 
     image_shape = tf.shape(image)
     combined_pad = tf.image.pad_to_bounding_box(combined, 0, 0, tf.maximum(crop_h, image_shape[0]), tf.maximum(crop_w, image_shape[1]))
     
@@ -113,8 +113,9 @@ def read_images_from_disk(input_queue, input_size, random_scale, random_mirror):
     label_contents = tf.read_file(input_queue[1])
     
     img = tf.image.decode_jpeg(img_contents, channels=3)
-    img_r, img_g, img_b = tf.split(split_dim=2, num_split=3, value=img)
-    img = tf.cast(tf.concat(2, [img_b, img_g, img_r]), dtype=tf.float32)
+    #img_r, img_g, img_b = tf.split(split_dim=2, num_split=3, value=img) API change from 0.12 to r1.0
+    img_r, img_g, img_b = tf.split(value=img, num_or_size_splits=3, axis=2)
+    img = tf.cast(tf.concat([img_b, img_g, img_r], 2), dtype=tf.float32)
     # Extract mean.
     img -= IMG_MEAN
 
