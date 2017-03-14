@@ -1,10 +1,12 @@
-# DeepLab-ResNet-TensorFlow
+# DeepLab-ResNet-TensorFlow(r1.0)
 
 [![Build Status](https://travis-ci.org/DrSleep/tensorflow-deeplab-resnet.svg?branch=master)](https://travis-ci.org/DrSleep/tensorflow-deeplab-resnet)
 
 This is an (re-)implementation of [DeepLab-ResNet](http://liangchiehchen.com/projects/DeepLabv2_resnet.html) in TensorFlow for semantic image segmentation on the [PASCAL VOC dataset](http://host.robots.ox.ac.uk/pascal/VOC/).
 
 ## Updates
+**14 Mar, 2017**:
+* change the API from 0.12 to r1.0
 
 **29 Jan, 2017**:
 * Fixed the implementation of the batch normalisation layer: it now supports both the training and inference steps. If the flag `--is-training` is provided, the running means and variances will be updated; otherwise, they will be kept intact. The `.ckpt` files have been updated accordingly - to download please refer to the new link provided below.
