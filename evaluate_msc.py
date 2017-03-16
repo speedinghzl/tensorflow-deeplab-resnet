@@ -17,9 +17,10 @@ import numpy as np
 
 from deeplab_resnet import DeepLabResNetModel, ImageReader, prepare_label
 
+os.environ['CUDA_VISIBLE_DEVICES'] = '0 '
 n_classes = 21
 
-DATA_DIRECTORY = '/home/VOCdevkit'
+DATA_DIRECTORY = '/workspace/hzl/tensorflow-program/data/VOCdevkit/voc12'
 DATA_LIST_PATH = './dataset/val.txt'
 NUM_STEPS = 1449 # Number of images in the validation set.
 RESTORE_FROM = './deeplab_resnet.ckpt'
@@ -72,8 +73,8 @@ def main():
 
     image_batch, label_batch = tf.expand_dims(image, dim=0), tf.expand_dims(label, dim=0) # Add one batch dimension.
     h_orig, w_orig = tf.to_float(tf.shape(image_batch)[1]), tf.to_float(tf.shape(image_batch)[2])
-    image_batch075 = tf.image.resize_images(image_batch, tf.pack([tf.to_int32(tf.mul(h_orig, 0.75)), tf.to_int32(tf.mul(w_orig, 0.75))]))
-    image_batch05 = tf.image.resize_images(image_batch, tf.pack([tf.to_int32(tf.mul(h_orig, 0.5)), tf.to_int32(tf.mul(w_orig, 0.5))]))
+    image_batch075 = tf.image.resize_images(image_batch, tf.stack([tf.to_int32(tf.multiply(h_orig, 0.75)), tf.to_int32(tf.multiply(w_orig, 0.75))]))
+    image_batch05 = tf.image.resize_images(image_batch, tf.stack([tf.to_int32(tf.multiply(h_orig, 0.5)), tf.to_int32(tf.multiply(w_orig, 0.5))]))
     
     # Create network.
     with tf.variable_scope('', reuse=False):
