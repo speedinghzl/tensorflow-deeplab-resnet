@@ -15,6 +15,7 @@ import time
 
 import tensorflow as tf
 import numpy as np
+from tensorflow.python import debug as tf_debug
 
 from deeplab_resnet import RefineResNetModel, DeepLabResNetModel, ImageReader, decode_labels, inv_preprocess, prepare_label
 
@@ -30,12 +31,12 @@ MOMENTUM = 0.9
 NUM_STEPS = 20001
 POWER = 0.9
 RANDOM_SEED = 1234
-RESTORE_FROM = './deeplab_resnet.ckpt'
+RESTORE_FROM = './deeplab_resnet_init.ckpt'
 SAVE_NUM_IMAGES = 2
 SAVE_PRED_EVERY = 1000
 SNAPSHOT_DIR = './snapshots/'
 WEIGHT_DECAY = 0.0005
-
+DEBUG = False
 
 def get_arguments():
     """Parse all the arguments provided from the CLI.
@@ -142,6 +143,15 @@ def main():
 
     # Predictions.
     raw_output = net.layers['RefineNet_scores']
+
+    if DEBUG:
+        def _debug_func(x_val):
+            import ipdb; ipdb.set_trace()  # XXX BREAKPOINT
+            return False
+
+        debug_op = tf.py_func(_debug_func, [net], [tf.bool])
+        with tf.control_dependencies(debug_op):
+            raw_output = tf.identity(raw_output, name='raw_output')
     # Which variables to load. Running means and variances are not trainable,
     # thus all_variables() should be restored.
     restore_var = [v for v in tf.global_variables() if 'RefineNet' not in v.name]
@@ -204,7 +214,6 @@ def main():
 
     train_op = tf.group(train_op_conv, train_op_fc_w, train_op_fc_b)
     
-    
     # Set up tf session and initialize variables. 
     config = tf.ConfigProto()
     config.gpu_options.allow_growth = True
@@ -212,7 +221,7 @@ def main():
     init = tf.global_variables_initializer()
     
     sess.run(init)
-    
+
     # Saver for storing checkpoints of the model.
     saver = tf.train.Saver(max_to_keep=10)
     

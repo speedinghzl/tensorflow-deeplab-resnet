@@ -94,9 +94,13 @@ class Network(object):
         ident = sum(t.startswith(prefix) for t, _ in self.layers.items()) + 1
         return '%s_%d' % (prefix, ident)
 
-    def make_var(self, name, shape):
+    def make_var(self, name, shape, initializer=tf.contrib.layers.xavier_initializer()): 
         '''Creates a new TensorFlow variable.'''
-        return tf.get_variable(name, shape, trainable=self.trainable, initializer=tf.contrib.layers.xavier_initializer())
+        return tf.get_variable(name, shape, trainable=self.trainable, initializer=initializer)
+
+    def get_weights(self, name, shape, stddev): 
+        '''Creates a new TensorFlow variable.'''
+        return tf.get_variable(name, shape, trainable=self.trainable, initializer=tf.truncated_normal_initializer(stddev=stddev))
 
     def validate_padding(self, padding):
         '''Verifies that the padding is one of the supported ones.'''
@@ -138,7 +142,7 @@ class Network(object):
                 output = tf.concat(3, output_groups)
             # Add the biases
             if biased:
-                biases = self.make_var('biases', [c_o])
+                biases = self.make_var('biases', [c_o], tf.zeros_initializer())
                 output = tf.nn.bias_add(output, biases)
             if relu:
                 # ReLU non-linearity
@@ -167,7 +171,7 @@ class Network(object):
         # Convolution for a given input and kernel
         convolve = lambda i, k: tf.nn.conv2d(i, k, [1, s_h, s_w, 1], padding=padding)
         with tf.variable_scope(name) as scope:
-            kernel = self.make_var('weights', shape=[k_h, k_w, c_i / group, c_o])
+            kernel = self.get_weights('weights', shape=[k_h, k_w, c_i / group, c_o], stddev=0.001)
             if group == 1:
                 # This is the common-case. Convolve the input without any further complications.
                 output = convolve(input, kernel)
@@ -180,7 +184,7 @@ class Network(object):
                 output = tf.concat(3, output_groups)
             # Add the biases
             if biased:
-                biases = self.make_var('biases', [c_o])
+                biases = self.get_weights('biases', [c_o], 0)
                 output = tf.nn.bias_add(output, biases)
             if relu:
                 # ReLU non-linearity
@@ -222,7 +226,7 @@ class Network(object):
                 output = tf.concat(3, output_groups)
             # Add the biases
             if biased:
-                biases = self.make_var('biases', [c_o])
+                biases = self.make_var('biases', [c_o], tf.zeros_initializer())
                 output = tf.nn.bias_add(output, biases)
             if relu:
                 # ReLU non-linearity
@@ -281,7 +285,7 @@ class Network(object):
             else:
                 feed_in, dim = (input, input_shape[-1].value)
             weights = self.make_var('weights', shape=[dim, num_out])
-            biases = self.make_var('biases', [num_out])
+            biases = self.make_var('biases', [num_out], tf.zeros_initializer())
             op = tf.nn.relu_layer if relu else tf.nn.xw_plus_b
             fc = op(feed_in, weights, biases, name=scope.name)
             return fc
